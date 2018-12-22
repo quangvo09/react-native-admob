@@ -64,13 +64,20 @@ RCT_EXPORT_METHOD(requestAd:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromise
     _requestAdResolve = nil;
     _requestAdReject = nil;
 
-    if ([_interstitial hasBeenUsed] || _interstitial == nil) {
+    if (_interstitial == nil || [_interstitial hasBeenUsed]) {
         _requestAdResolve = resolve;
         _requestAdReject = reject;
 
         _interstitial = [[GADInterstitial alloc] initWithAdUnitID:_adUnitID];
         _interstitial.delegate = self;
 
+        GADRequest *request = [GADRequest request];
+        request.testDevices = _testDevices;
+        [_interstitial loadRequest:request];
+    } else if (![_interstitial isReady]){
+        _requestAdResolve = resolve;
+        _requestAdReject = reject;
+        
         GADRequest *request = [GADRequest request];
         request.testDevices = _testDevices;
         [_interstitial loadRequest:request];
